@@ -157,13 +157,23 @@ class ListingController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'bedrooms' => 'required|integer|min:1',
+            'deposit' => 'nullable|numeric|min:0',
+            'bedrooms' => 'required|integer|min:0',
             'bathrooms' => 'required|integer|min:1',
+            'area_sqft' => 'nullable|integer|min:0',
             'property_type' => 'required|in:apartment,house,studio,shared_room,bungalow',
             'neighborhood' => 'required|string',
-            'location_address' => 'required|string',
-            'location_lat' => 'required|numeric',
-            'location_long' => 'required|numeric',
+            'location_address' => 'nullable|string',
+            'location_lat' => 'nullable|numeric',
+            'location_long' => 'nullable|numeric',
+            'furnished' => 'nullable|boolean',
+            'wifi' => 'nullable|boolean',
+            'parking' => 'nullable|boolean',
+            'security' => 'nullable|boolean',
+            'pool' => 'nullable|boolean',
+            'gym' => 'nullable|boolean',
+            'photos' => 'nullable|array|max:3',
+            'photos.*' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -175,27 +185,60 @@ class ListingController extends Controller
         }
 
         try {
+            // Generate default location if not provided
+            $locationAddress = $request->location_address ?? $request->neighborhood . ', Accra';
+            $locationLat = $request->location_lat ?? 5.6037 + (rand(-100, 100) / 10000);
+            $locationLong = $request->location_long ?? -0.1870 + (rand(-100, 100) / 10000);
+
             $listing = Listing::create([
                 'landlord_id' => Auth::id(),
                 'title' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,
+                'deposit' => $request->deposit ?? 0,
                 'bedrooms' => $request->bedrooms,
                 'bathrooms' => $request->bathrooms,
+                'area_sqft' => $request->area_sqft ?? 0,
                 'property_type' => $request->property_type,
                 'neighborhood' => $request->neighborhood,
-                'location_address' => $request->location_address,
-                'location_lat' => $request->location_lat,
-                'location_long' => $request->location_long,
-                'verification_status' => 'pending',
+                'location_address' => $locationAddress,
+                'location_lat' => $locationLat,
+                'location_long' => $locationLong,
+                'furnished' => $request->furnished ? 1 : 0,
+                'wifi' => $request->wifi ? 1 : 0,
+                'parking' => $request->parking ? 1 : 0,
+                'security' => $request->security ? 1 : 0,
+                'pool' => $request->pool ? 1 : 0,
+                'gym' => $request->gym ? 1 : 0,
+                'verification_status' => 'approved',
                 'is_available' => true,
             ]);
+
+            // Handle photo uploads
+            if ($request->hasFile('photos')) {
+                $photos = $request->file('photos');
+
+                foreach ($photos as $index => $photo) {
+                    // Store photo in storage/app/listings
+                    $path = $photo->store('listings/' . $listing->id, 'public');
+                    $url = asset('storage/' . $path);
+
+                    // Create photo record
+                    \App\Models\Photo::create([
+                        'listing_id' => $listing->id,
+                        'photo_path' => $path,
+                        'photo_url' => $url,
+                        'is_primary' => $index === 0,
+                        'order' => $index + 1,
+                    ]);
+                }
+            }
 
             $listing->load(['photos', 'primaryPhoto', 'landlord']);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Listing created successfully. Pending admin approval.',
+                'message' => 'Listing created successfully and is now visible to tenants!',
                 'data' => new ListingResource($listing)
             ], 201);
 

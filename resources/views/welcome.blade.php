@@ -1,14 +1,199 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+@section('title', 'Home - Accra Housing Marketplace')
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+@section('content')
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-red-600 via-red-500 to-red-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h1 class="text-5xl md:text-6xl font-bold mb-6">Find Your Perfect Home</h1>
+                <p class="text-xl text-red-100 mb-8">Discover affordable housing and rooms across Accra. Connect directly with landlords and tenants.</p>
+                <div class="flex gap-4">
+                    <a href="/listings" class="bg-white text-red-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition">
+                        <i class="fas fa-search mr-2"></i> Browse Listings
+                    </a>
+                    @guest
+                        <a href="/register" class="bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-8 rounded-lg transition border border-white">
+                            <i class="fas fa-user-plus mr-2"></i> Get Started
+                        </a>
+                    @endguest
+                </div>
+            </div>
+            <div class="hidden md:block">
+                <div class="bg-white/10 rounded-2xl p-8 backdrop-blur-sm">
+                    <i class="fas fa-home text-8xl text-white/20"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-20 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Why Choose Accra Housing?</h2>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
+                <div class="text-4xl text-red-600 mb-4"><i class="fas fa-search"></i></div>
+                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Easy Search</h3>
+                <p class="text-gray-600 dark:text-gray-400">Filter listings by budget, location, property type, and more.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
+                <div class="text-4xl text-red-600 mb-4"><i class="fas fa-lock"></i></div>
+                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Secure Payments</h3>
+                <p class="text-gray-600 dark:text-gray-400">Safe payments with MoMo integration.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
+                <div class="text-4xl text-red-600 mb-4"><i class="fas fa-comments"></i></div>
+                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Direct Contact</h3>
+                <p class="text-gray-600 dark:text-gray-400">Connect via WhatsApp or phone directly.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Listings Section -->
+<div class="py-20 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-4 text-gray-900 dark:text-white">Featured Properties</h2>
+        <p class="text-center text-gray-600 dark:text-gray-400 mb-12">Explore some of our latest premium listings</p>
+
+        <?php
+            $featured = \App\Models\Listing::where('verification_status', 'approved')
+                ->orderBy('view_count', 'desc')
+                ->limit(6)
+                ->get();
+        ?>
+
+        @if($featured->count() > 0)
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach($featured as $listing)
+                    <a href="/listings/{{ $listing->id }}" class="group">
+                        <div class="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition">
+                            <!-- Image with Overlay -->
+                            <div class="relative overflow-hidden h-64 bg-gray-200 dark:bg-gray-600">
+                                <?php
+                                    $primaryPhoto = null;
+                                    if (method_exists($listing, 'photos') && is_callable($listing->photos)) {
+                                        $primaryPhoto = $listing->photos()->where('is_primary', true)->first() ?? $listing->photos()->first();
+                                    } elseif (isset($listing->photos) && is_array($listing->photos)) {
+                                        $primaryPhoto = collect($listing->photos)->firstWhere('is_primary', true) ?? collect($listing->photos)->first();
+                                    }
+                                ?>
+                                @if($primaryPhoto)
+                                    <img src="{{ $primaryPhoto->photo_url ?? $primaryPhoto['photo_url'] }}"
+                                         alt="{{ $listing->title }}"
+                                         class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                                @else
+                                    <div class="flex items-center justify-center h-full">
+                                        <i class="fas fa-image text-gray-400 text-4xl"></i>
+                                    </div>
+                                @endif
+
+                                <!-- Property Type Badge -->
+                                <div class="absolute top-4 right-4">
+                                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold capitalize">
+                                        {{ str_replace('_', ' ', $listing->property_type) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-red-600 transition">
+                                    {{ $listing->title }}
+                                </h3>
+
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                                    {{ $listing->description }}
+                                </p>
+
+                                <!-- Property Details -->
+                                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-4 py-3 border-t border-gray-200 dark:border-gray-600">
+                                    @if($listing->bedrooms > 0)
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-bed text-red-600"></i>
+                                            <span>{{ $listing->bedrooms }} Beds</span>
+                                        </div>
+                                    @endif
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-bath text-red-600"></i>
+                                        <span>{{ $listing->bathrooms }} Baths</span>
+                                    </div>
+                                    @if($listing->area_sqft)
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-ruler text-red-600"></i>
+                                            <span>{{ $listing->area_sqft }} sqft</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <!-- Location & Price -->
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                            <i class="fas fa-map-marker-alt mr-1 text-red-600"></i> {{ $listing->neighborhood ?? 'Accra' }}
+                                        </p>
+                                        <p class="text-2xl font-bold text-red-600">
+                                            ₵{{ number_format($listing->price, 0) }}<span class="text-sm text-gray-600 dark:text-gray-400">/mo</span>
+                                        </p>
+                                    </div>
+                                    <button class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 p-3 rounded-lg hover:bg-red-200 dark:hover:bg-red-800 transition">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="/listings" class="bg-red-600 text-white hover:bg-red-700 font-bold py-4 px-12 rounded-lg transition inline-block">
+                    <i class="fas fa-list mr-2"></i> Browse All {{ $featured->count() > 5 ? 'Listings' : 'Properties' }}
+                </a>
+            </div>
+        @else
+            <div class="text-center py-12">
+                <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">No properties available yet</p>
+                <a href="/listings" class="text-red-600 hover:text-red-700 font-semibold">
+                    Browse upcoming listings
+                </a>
+            </div>
+        @endif
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="bg-red-600 text-white py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-4">Ready to Find Your Home?</h2>
+        <p class="text-red-100 mb-8">Join thousands of satisfied tenants and landlords on Accra Housing Marketplace</p>
+        <div class="flex gap-4 justify-center flex-wrap">
+            <a href="/listings" class="bg-white text-red-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition">
+                <i class="fas fa-search mr-2"></i> Browse Now
+            </a>
+            @guest
+                <a href="/register" class="bg-red-800 hover:bg-red-900 font-bold py-3 px-8 rounded-lg transition border border-white">
+                    <i class="fas fa-user-plus mr-2"></i> Get Started
+                </a>
+            @else
+                <a href="/dashboard" class="bg-red-800 hover:bg-red-900 font-bold py-3 px-8 rounded-lg transition border border-white">
+                    <i class="fas fa-chart-line mr-2"></i> My Dashboard
+                </a>
+            @endguest
+        </div>
+    </div>
+</div>
+@endsection
 
         <!-- Styles / Scripts -->
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
