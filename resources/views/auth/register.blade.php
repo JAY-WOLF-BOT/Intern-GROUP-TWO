@@ -9,8 +9,44 @@
             <h1 class="text-3xl font-bold mb-2 text-center text-gray-900 dark:text-white">Create Account</h1>
             <p class="text-center text-gray-600 dark:text-gray-400 mb-8">Join the Accra Housing Marketplace</p>
 
-            <form method="POST" action="{{ route('register') }}" class="space-y-4">
+            @if (session('success'))
+                <div class="mb-6 p-4 bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-400 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        <span class="font-semibold">Registration Successful!</span>
+                    </div>
+                    <p class="mb-2">{{ session('success') }}</p>
+                    @if(strpos(session('success'), 'Code for demo:') !== false)
+                        <div class="mt-3 p-3 bg-green-200 dark:bg-green-800/50 rounded-lg border-2 border-dashed border-green-400">
+                            <p class="text-sm font-mono text-center text-green-800 dark:text-green-200">
+                                <strong>OTP Code:</strong>
+                                <span class="text-lg font-bold tracking-wider">
+                                    {{ substr(session('success'), strpos(session('success'), 'Code for demo:') + 15) }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="{{ route('verify-phone') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                                Proceed to Verification
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-4 p-4 bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('register.post') }}" class="space-y-4">
                 @csrf
+
+                <input type="hidden" name="role" value="tenant" />
+                <input type="hidden" name="verification_method" value="phone" />
 
                 <!-- Name -->
                 <div>
@@ -46,52 +82,6 @@
                     @enderror
                 </div>
 
-                <!-- Role Selection -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">I am a...</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="relative">
-                            <input type="radio" name="role" value="tenant" {{ old('role', 'tenant') === 'tenant' ? 'checked' : '' }} class="sr-only" required>
-                            <div class="p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 transition" id="tenant-option">
-                                <i class="fas fa-home text-red-600 text-xl mb-2"></i>
-                                <p class="font-medium text-gray-900 dark:text-white">Tenant</p>
-                                <p class="text-xs text-gray-500">Looking for housing</p>
-                            </div>
-                        </label>
-                        <label class="relative">
-                            <input type="radio" name="role" value="landlord" {{ old('role') === 'landlord' ? 'checked' : '' }} class="sr-only" required>
-                            <div class="p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 transition" id="landlord-option">
-                                <i class="fas fa-building text-red-600 text-xl mb-2"></i>
-                                <p class="font-medium text-gray-900 dark:text-white">Landlord</p>
-                                <p class="text-xs text-gray-500">Listing properties</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Verification Method -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">First time? Verify with...</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="relative">
-                            <input type="radio" name="verification_method" value="email" checked class="sr-only" required>
-                            <div class="p-4 border-2 border-red-300 rounded-lg cursor-pointer hover:border-red-500 transition bg-red-50 dark:bg-red-900/10" id="email-option">
-                                <i class="fas fa-envelope text-red-600 text-xl mb-2"></i>
-                                <p class="font-medium text-gray-900 dark:text-white text-sm">Email</p>
-                                <p class="text-xs text-gray-500">Verification link sent</p>
-                            </div>
-                        </label>
-                        <label class="relative">
-                            <input type="radio" name="verification_method" value="phone" class="sr-only" required>
-                            <div class="p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 transition" id="phone-option">
-                                <i class="fas fa-phone text-red-600 text-xl mb-2"></i>
-                                <p class="font-medium text-gray-900 dark:text-white text-sm">SMS/OTP</p>
-                                <p class="text-xs text-gray-500">OTP sent to phone</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
                 <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
@@ -122,6 +112,13 @@
                     <a href="{{ route('login') }}" class="text-red-600 hover:text-red-700 font-medium">Sign In</a>
                 </p>
             </form>
+
+            <!-- Demo Info -->
+            <div class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p class="text-xs text-blue-800 dark:text-blue-300">
+                    <strong>Demo Mode:</strong> When using SMS/OTP verification, the OTP code will be displayed prominently on this page after registration.
+                </p>
+            </div>
         </div>
     </div>
 </div>

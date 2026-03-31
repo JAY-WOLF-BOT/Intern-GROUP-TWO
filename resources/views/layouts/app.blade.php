@@ -11,7 +11,45 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
 
     <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3H7bCOT6WiOku/jfiuJzsc3dwWUkwXkrjX84rios5mlULw3IUoIsDmtlIvIrSad2k7khUzJ+gyZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        /* Force FontAwesome icons to render with size and no zero dimensions */
+        .fa, .fas, .fa-solid, .fa-regular, .fa-brands, .fa-light {
+            display: inline-block !important;
+            width: auto !important;
+            height: auto !important;
+            line-height: 1 !important;
+            font-size: inherit !important; /* keep text-xl etc. working */
+            vertical-align: middle !important;
+            text-rendering: auto !important;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+        }
+
+        .fa-solid, .fas {
+            font-family: 'Font Awesome 6 Free' !important;
+            font-weight: 900 !important;
+        }
+
+        .fa-brands, .fab {
+            font-family: 'Font Awesome 6 Brands' !important;
+            font-weight: 400 !important;
+        }
+
+        .fa-regular, .far {
+            font-family: 'Font Awesome 6 Free' !important;
+            font-weight: 400 !important;
+        }
+
+        /* Ensure pseudo content is shown if Font Awesome is loaded */
+        .fa:before, .fas:before, .fa-solid:before, .fa-regular:before, .fa-brands:before, .fa-light:before {
+            display: inline-block !important;
+            width: auto !important;
+            height: auto !important;
+        }
+    </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -29,12 +67,14 @@
         }
     </style>
 </head>
-<body class="bg-white dark:bg-[#0a0a0a]">
+<body>
+    <!-- Navbar Section (can be overridden by child views) -->
+    @section('navbar')
     <nav class="bg-white dark:bg-[#1D1D1A] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
-                <a href="{{ route('home') }}" class="flex items-center space-x-2">
+                <a href="{{ route('homepage') }}" class="flex items-center space-x-2">
                     <i class="fas fa-building text-red-600 text-2xl"></i>
                     <span class="font-bold text-lg text-gray-900 dark:text-white">Accra Housing</span>
                 </a>
@@ -86,15 +126,17 @@
             </div>
         </div>
     </nav>
+    @show
 
     <!-- Main Content -->
-    <main class="min-h-screen">
+    <main class="flex-1 pb-10">
         @yield('content')
     </main>
 
-    <!-- Footer -->
+    <!-- Default Footer (can be overridden by child views) -->
+    @section('footer')
     <footer class="bg-gray-900 dark:bg-[#0a0a0a] text-white mt-12 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="grid md:grid-cols-4 gap-8">
                 <div>
                     <h3 class="font-bold mb-4">About</h3>
@@ -122,11 +164,12 @@
                     <p class="text-gray-400 text-sm">📱 +233 (0) 123 456 789</p>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+            <div class="border-t border-gray-800 mt-6 pt-6 text-center text-gray-400 text-sm">
                 <p>&copy; 2026 Accra Housing Marketplace. All rights reserved.</p>
             </div>
         </div>
     </footer>
+    @show
 
     @if ($errors->any())
         <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">

@@ -7,22 +7,9 @@ use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfileController;
 
 // Public routes
-Route::get('/welcome', function () {
-    return view('welcome');
-})->name('home');
-
 Route::get('/', function () {
     return view('Homepage');
 })->name('homepage');
-
-
-Route::get('/listings', function () {
-    return view('listings.index');
-})->name('listings.index');
-
-Route::get('/listings/{id}', function ($id) {
-    return view('listings.show');
-})->name('listings.show');
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
@@ -30,21 +17,21 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', function () {
         return view('auth.register');
     })->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
     // Login
     Route::get('/login', function () {
         return view('auth.login');
     })->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
     // Email Verification
     Route::get('/verify-email', [AuthController::class, 'verifyEmail'])->name('verify-email');
-    Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+    Route::post('/verify-email', [AuthController::class, 'verifyEmail'])->name('verify-email.post');
 
     // Phone Verification
     Route::get('/verify-phone', [AuthController::class, 'verifyPhone'])->name('verify-phone');
-    Route::post('/verify-phone', [AuthController::class, 'verifyPhone']);
+    Route::post('/verify-phone', [AuthController::class, 'verifyPhone'])->name('verify-phone.post');
     Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend-otp');
 
     // Password Reset
@@ -59,13 +46,32 @@ Route::middleware('guest')->group(function () {
 // Authenticated routes
 Route::middleware('auth')->group(function () {
     // Dashboard routes
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+        if ($user->role === 'landlord') {
+            return redirect('/dashboard/landlord');
+        } elseif ($user->role === 'tenant') {
+            return redirect('/dashboard/tenant');
+        }
+        return redirect('/'); // fallback
+    })->name('dashboard');
+
     Route::get('/dashboard/landlord', function () {
         return view('dashboard.landlord');
-    })->name('dashboard.landlord');
+    })->middleware('landlord')->name('dashboard.landlord');
 
     Route::get('/dashboard/tenant', function () {
         return view('dashboard.tenant');
     })->name('dashboard.tenant');
+
+    // Listings - browsing (protected)
+    Route::get('/listings', function () {
+        return view('listings.index');
+    })->name('listings.index');
+
+    Route::get('/listings/{id}', function ($id) {
+        return view('listings.show');
+    })->name('listings.show');
 
     // Listings management
     Route::get('/listings/create', [ListingController::class, 'create'])->name('listings.create');
@@ -75,15 +81,36 @@ Route::middleware('auth')->group(function () {
     Route::delete('/listings/{id}', [ListingController::class, 'destroy'])->name('listings.destroy');
 
     // User routes
-    Route::get('/profile', function () {
-        return view('profile');
-    })->name('profile');
-    Route::post('/profile/picture', [ProfileController::class, 'uploadProfilePicture'])->name('profile.picture.upload');
-    Route::delete('/profile/picture', [ProfileController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    Route::middleware('auth')->group(function () {
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+        Route::post('/profile/info', [ProfileController::class, 'updateInfo'])->name('profile.info');
+        Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+        Route::post('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
+        Route::delete('/profile/picture', [ProfileController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    });
 
     Route::get('/favorites', function () {
         return view('favorites');
     })->name('favorites');
+
+    // Messages - coming soon
+    Route::get('/messages', function () {
+        return view('coming-soon', ['feature' => 'Messages']);
+    })->name('messages.index');
+
+    // Payments - coming soon
+    Route::get('/payments', function () {
+        return view('coming-soon', ['feature' => 'Payments']);
+    })->name('payments.index');
+
+    Route::get('/payments/history', function () {
+        return view('coming-soon', ['feature' => 'Payment History']);
+    })->name('payments.history');
+
+    // Settings
+    Route::get('/settings', function () {
+        return view('coming-soon', ['feature' => 'Settings']);
+    })->name('settings');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

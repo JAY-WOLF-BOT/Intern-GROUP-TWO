@@ -2,268 +2,280 @@
 
 @section('title', 'Tenant Dashboard - Accra Housing')
 
+@section('navbar')
+    <!-- Top Navbar -->
+    <nav class="bg-blue-600 h-16 sticky top-0 z-50 md:ml-64 shadow-sm flex items-center justify-between px-6 border-b border-gray-100">
+        <a href="{{ url('/') }}" class="flex items-center space-x-2 text-white hover:text-blue-200 transition">
+            <i class="fa-solid fa-building text-white text-xl"></i>
+            <span class="font-bold text-lg">Accra Housing - Tenant</span>
+        </a>
+
+        <div class="flex items-center">
+            <div class="relative group">
+                <button class="flex items-center space-x-3 text-white hover:text-blue-200 focus:outline-none transition py-2">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-bold leading-none">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-blue-200 font-medium">Tenant</p>
+                    </div>
+                    
+                    <div class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center border-2 border-blue-100">
+                        <span class="text-blue-600 font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 group-hover:text-blue-500 transition"></i>
+                </button>
+
+                <div class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100">
+                    <a href="{{ route('profile') }}" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                        <i class="fas fa-user-circle mr-3 opacity-70"></i> My Profile
+                    </a>
+                    <a href="{{ route('favorites') }}" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50">
+                        <i class="fas fa-heart mr-3 opacity-70"></i> Favorites
+                    </a>
+                    <hr class="my-1 border-gray-50">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-medium">
+                            <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+@endsection
+
 @section('content')
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex items-center gap-4">
-                <div id="profilePictureContainer">
-                    <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-2xl text-gray-400"></i>
-                    </div>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back!</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Find your perfect home in Accra</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <!-- Quick Stats -->
-        <div class="grid md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm">My Favorites</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white" id="favCount">0</p>
-                    </div>
-                    <i class="fas fa-heart text-4xl text-red-100"></i>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm">Payments Made</p>
-                        <p class="text-3xl font-bold text-blue-600" id="paymentCount">0</p>
-                    </div>
-                    <i class="fas fa-credit-card text-4xl text-blue-100"></i>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm">Total Spent</p>
-                        <p class="text-3xl font-bold text-green-600" id="totalSpent">GHS 0</p>
-                    </div>
-                    <i class="fas fa-wallet text-4xl text-green-100"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-            <div class="flex border-b border-gray-200 dark:border-gray-700">
-                <button onclick="switchTab('favorites')" class="tab-btn px-6 py-4 font-medium text-gray-700 dark:text-gray-300 border-b-2 border-transparent hover:border-red-500 transition active" data-tab="favorites">
-                    <i class="fas fa-heart mr-2"></i> My Favorites
-                </button>
-                <button onclick="switchTab('payments')" class="tab-btn px-6 py-4 font-medium text-gray-700 dark:text-gray-300 border-b-2 border-transparent hover:border-red-500 transition" data-tab="payments">
-                    <i class="fas fa-receipt mr-2"></i> Payment History
-                </button>
-            </div>
-
-            <!-- Favorites Tab -->
-            <div id="favorites-tab" class="tab-content p-6">
-                <div id="favoritesContainer" class="grid md:grid-cols-3 gap-6">
-                    <!-- Loaded dynamically -->
-                </div>
-                <div id="noFavorites" style="display: none;" class="text-center py-12">
-                    <i class="fas fa-heart text-4xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 dark:text-gray-400">No favorites yet. Start exploring listings!</p>
-                    <a href="/listings" class="mt-4 inline-block text-red-600 hover:text-red-700 font-medium">Browse Listings</a>
-                </div>
-            </div>
-
-            <!-- Payments Tab -->
-            <div id="payments-tab" class="tab-content p-6" style="display: none;">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 dark:text-gray-300">Date</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 dark:text-gray-300">Property</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 dark:text-gray-300">Amount</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 dark:text-gray-300">Type</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 dark:text-gray-300">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="paymentsList" class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <!-- Loaded dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="noPayments" style="display: none;" class="text-center py-12">
-                    <i class="fas fa-receipt text-4xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 dark:text-gray-400">No payment history yet.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function getCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-}
-
-function switchTab(tab) {
-    // Hide all tabs
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-
-    // Remove active class from buttons
-    document.querySelectorAll('.tab-btn').forEach(el => {
-        el.classList.remove('active');
-        el.classList.remove('border-red-600');
-        el.classList.add('border-transparent');
-    });
-
-    // Show selected tab
-    document.getElementById(tab + '-tab').style.display = 'block';
-
-    // Add active class to button
-    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-    document.querySelector(`[data-tab="${tab}"]`).classList.add('border-red-600');
-    document.querySelector(`[data-tab="${tab}"]`).classList.remove('border-transparent');
-}
-
-async function loadDashboard() {
-    const csrfToken = getCsrfToken();
-
-    try {
-        // Load profile picture
-        const userResponse = await fetch('/api/v1/user/profile', {
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        });
-        const userData = await userResponse.json();
-        if (userData.success && userData.data.profile_picture) {
-            const container = document.getElementById('profilePictureContainer');
-            container.innerHTML = `<img src="${userData.data.profile_picture}" alt="Profile" class="w-16 h-16 rounded-full object-cover border-2 border-red-500">`;
-        }
-
-        // Load favorites
-        const favResponse = await fetch('/api/v1/favorites/my-favorites', {
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        });
-        const favData = await favResponse.json();
-        if (favData.success) {
-            renderFavorites(favData.data);
-        }
-
-        // Load payments
-        const payResponse = await fetch('/api/v1/payments/history', {
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        });
-        const payData = await payResponse.json();
-        if (payData.success) {
-            renderPayments(payData.data);
-        }
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
+<style>
+    :root {
+        --primary: #2563eb;
     }
-}
-
-function renderFavorites(favorites) {
-    document.getElementById('favCount').textContent = favorites.length;
-
-    if (favorites.length === 0) {
-        document.getElementById('noFavorites').style.display = 'block';
-        document.getElementById('favoritesContainer').innerHTML = '';
-        return;
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
+    .animate-fade-in { animation: fadeInUp 0.6s ease-out; }
+    .icon-cyan { color: #06b6d4; }
+    .icon-teal { color: #14b8a6; }
+    .icon-indigo { color: #4f46e5; }
+    .icon-purple { color: #a855f7; }
+    .icon-violet { color: #7c3aed; }
+    .icon-amber { color: #f59e0b; }
+    .icon-rose { color: #f43f5e; }
+    .icon-emerald { color: #10b981; }
+    .icon-sky { color: #0ea5e9; }
+</style>
 
-    document.getElementById('favoritesContainer').innerHTML = favorites.map(fav => `
-        <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition transform hover:scale-105">
-            <div class="relative h-48 bg-gray-300 dark:bg-gray-700">
-                ${fav.listing.photos && fav.listing.photos.length > 0
-                    ? `<img src="${fav.listing.photos[0].url}" class="w-full h-full object-cover">`
-                    : `<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image text-4xl"></i></div>`
-                }
-                <div class="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">GHS ${fav.listing.price}</div>
-                <button onclick="removeFavorite(${fav.id})" class="absolute top-2 left-2 bg-red-600 hover:bg-red-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
-                    <i class="fas fa-heart"></i>
-                </button>
+    <!-- Page Wrapper: flex column, min height screen, allows footer to naturally flow -->
+    <div class="flex flex-col min-h-screen bg-gray-50">
+        <!-- Sidebar Container (fixed) -->
+        <div class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-blue-50 to-white shadow-lg z-10 flex flex-col">
+            <!-- Logo/Brand -->
+            <div class="flex items-center justify-center h-16 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                <i class="fas fa-door-open mr-2"></i>
+                <h1 class="text-xl font-bold">Tenant Portal</h1>
             </div>
-            <div class="p-4">
-                <h3 class="font-bold text-gray-900 dark:text-white mb-2">${fav.listing.title}</h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">${fav.listing.neighborhood || 'Accra'}</p>
-                <a href="/listings/${fav.listing.id}" class="block w-full bg-red-600 hover:bg-red-700 text-white text-center py-2 rounded-lg font-medium transition">
-                    View Details
+
+            <!-- Navigation -->
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <a href="/dashboard/tenant" class="flex items-center px-4 py-3 text-gray-700 bg-gray-200 rounded-lg transition-all duration-300 hover:bg-gray-300 hover:translate-x-1">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard
                 </a>
+                <a href="/listings" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200 rounded-lg transition-all duration-300 hover:translate-x-1">
+                    <i class="fas fa-building mr-3"></i>
+                    Properties
+                </a>
+                <a href="/messages" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200 rounded-lg transition-all duration-300 hover:translate-x-1">
+                    <i class="fas fa-envelope mr-3"></i>
+                    Messages
+                </a>
+                <a href="/payments" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200 rounded-lg transition-all duration-300 hover:translate-x-1">
+                    <i class="fas fa-credit-card mr-3"></i>
+                    Payments
+                </a>
+                <a href="/payments/history" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200 rounded-lg transition-all duration-300 hover:translate-x-1">
+                    <i class="fas fa-history mr-3"></i>
+                    Payment History
+                </a>
+                <a href="/favorites" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200 rounded-lg transition-all duration-300 hover:translate-x-1">
+                    <i class="fas fa-heart mr-3"></i>
+                    Favorites
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200 rounded-lg transition-all duration-300 hover:translate-x-1">
+                    <i class="fas fa-cog mr-3"></i>
+                    Settings
+                </a>
+            </nav>
+
+            <!-- User Info -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <img src="{{ auth()->user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name ?? 'Guest') . '&background=0D8ABC&color=fff' }}" alt="Profile" class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name ?? 'Guest' }}</p>
+                        <p class="text-xs text-gray-500">Tenant</p>
+                    </div>
+                </div>
             </div>
         </div>
-    `).join('');
-}
 
-function renderPayments(payments) {
-    document.getElementById('paymentCount').textContent = payments.length;
+        <!-- Main Content Area (flex-1 to grow and push footer down) -->
+        <div class="flex-1 ml-0 md:ml-64 animate-fade-in pt-24 md:pt-20 lg:pt-10">
+            <div class="max-w-7xl mx-auto p-4 md:p-8">
+                <!-- Header -->
+                <header class="bg-white shadow-sm border-b border-gray-200 mb-6">
+                    <div class="flex items-center justify-between px-6 py-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Good Morning, {{ auth()->user()->name }}</h1>
+                            <p class="text-gray-600">Welcome back to your tenant dashboard</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button class="p-2 text-gray-600 hover:text-gray-900">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="p-2 text-gray-600 hover:text-gray-900">
+                                <i class="fas fa-bell"></i>
+                            </button>
+                            <img src="{{ auth()->user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name ?? 'Guest') . '&background=0D8ABC&color=fff' }}" alt="Profile" class="w-10 h-10 rounded-full">
+                        </div>
+                    </div>
+                </header>
 
-    let totalSpent = 0;
-    payments.forEach(p => {
-        totalSpent += parseFloat(p.amount) || 0;
-    });
-    document.getElementById('totalSpent').textContent = `GHS ${totalSpent.toFixed(2)}`;
+                <!-- Content -->
+                <main class="space-y-6">
+                    <!-- Rent Overview Card -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl shadow-lg p-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-100 text-sm font-medium mb-1">Current Rent Payment</p>
+                                <h2 class="text-4xl font-bold mb-2">GHS 1,500</h2>
+                                <p class="text-blue-100">Due: March 31, 2026</p>
+                            </div>
+                            <div class="text-6xl opacity-20">
+                                <i class="fas fa-home"></i>
+                            </div>
+                        </div>
+                    </div>
 
-    if (payments.length === 0) {
-        document.getElementById('noPayments').style.display = 'block';
-        document.getElementById('paymentsList').innerHTML = '';
-        return;
-    }
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition-transform">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-medium text-gray-600">Active Tenancy</h3>
+                                <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">1 Property</p>
+                            <p class="text-sm text-gray-600 mt-2">Lease expires: 12/31/2026</p>
+                        </div>
 
-    document.getElementById('paymentsList').innerHTML = payments.map(payment => `
-        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-            <td class="px-4 py-3 text-gray-900 dark:text-white">${new Date(payment.created_at).toLocaleDateString()}</td>
-            <td class="px-4 py-3 text-gray-900 dark:text-white">${payment.listing?.title}</td>
-            <td class="px-4 py-3 font-bold text-gray-900 dark:text-white">GHS ${parseFloat(payment.amount).toFixed(2)}</td>
-            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 capitalize">${payment.payment_type}</td>
-            <td class="px-4 py-3">
-                <span class="px-3 py-1 rounded-full text-xs font-bold ${
-                    payment.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                }">
-                    ${payment.status?.charAt(0).toUpperCase() + payment.status?.slice(1)}
-                </span>
-            </td>
-        </tr>
-    `).join('');
-}
+                        <div class="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition-transform">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-medium text-gray-600">Saved Properties</h3>
+                                <i class="fas fa-heart text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">8 Listings</p>
+                            <p class="text-sm text-gray-600 mt-2">In your favorites</p>
+                        </div>
 
-async function removeFavorite(id) {
-    const csrfToken = getCsrfToken();
-    try {
-        const response = await fetch(`/api/v1/favorites/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        });
-        const data = await response.json();
-        if (data.success) {
-            alert('Removed from favorites');
-            loadDashboard();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to remove favorite'));
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred');
-    }
-}
+                        <div class="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition-transform">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-medium text-gray-600">Payment Status</h3>
+                                <i class="fas fa-credit-card text-blue-600 text-2xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">Paid</p>
+                            <p class="text-sm text-green-600 mt-2">Last payment: 3/1/2026</p>
+                        </div>
+                    </div>
 
-window.addEventListener('DOMContentLoaded', loadDashboard);
-</script>
+                    <!-- Maintenance and Contact -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Maintenance Request Shortcut -->
+                        <div class="bg-white rounded-2xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-tools mr-2 icon-amber"></i>Maintenance</h3>
+                            <div class="text-center">
+                                <button class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition text-lg">
+                                    <i class="fas fa-tools mr-2"></i>Report an Issue
+                                </button>
+                                <p class="text-sm text-gray-600 mt-2">Need repairs or maintenance? Let your landlord know.</p>
+                            </div>
+                        </div>
+
+                        <!-- Contact Section -->
+                        <div class="bg-white rounded-2xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-address-book mr-2 icon-rose"></i>Contact Landlord</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="text-center">
+                                    <i class="fas fa-phone icon-emerald mb-3" style="font-size: 2rem; display: block;"></i>
+                                    <p class="text-sm font-medium text-gray-600">Phone/WhatsApp</p>
+                                    <p class="text-gray-900">+233 (0) 123 456 789</p>
+                                    <a href="tel:+2330123456789" class="text-emerald-600 hover:text-emerald-700 font-medium">Call Now</a>
+                                </div>
+                                <div class="text-center">
+                                    <i class="fas fa-envelope icon-sky mb-3" style="font-size: 2rem; display: block;"></i>
+                                    <p class="text-sm font-medium text-gray-600">Email Support</p>
+                                    <p class="text-gray-900">support@accrahousing.com</p>
+                                    <a href="mailto:support@accrahousing.com" class="text-sky-600 hover:text-sky-700 font-medium">Send Email</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Tenancy Details -->
+                    <div class="bg-white rounded-2xl shadow p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-6">Your Current Tenancy</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <i class="fas fa-map-marker-alt icon-rose mb-3" style="font-size: 1.25rem; display: block;"></i>
+                                <p class="text-sm font-medium text-gray-600">Property Address</p>
+                                <p class="text-gray-900">123 Main Street, Accra, Ghana</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-user icon-indigo mb-3" style="font-size: 1.25rem; display: block;"></i>
+                                <p class="text-sm font-medium text-gray-600">Landlord Name</p>
+                                <p class="text-gray-900">{{ auth()->user()->name }}</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-calendar icon-indigo mb-3" style="font-size: 1.25rem; display: block;"></i>
+                                <p class="text-sm font-medium text-gray-600">Lease Expiry</p>
+                                <p class="text-gray-900">December 31, 2026</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+@endsection
+
+@section('footer')
+<footer class="bg-gradient-to-r from-blue-600 to-blue-700 text-white mt-12 border-t border-blue-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="font-bold mb-4">Rentals</h3>
+                <ul class="text-blue-100 text-sm space-y-2">
+                    <li><a href="/listings" class="hover:text-white">Browse Properties</a></li>
+                    <li><a href="/favorites" class="hover:text-white">My Favorites</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold mb-4">Account</h3>
+                <ul class="text-blue-100 text-sm space-y-2">
+                    <li><a href="/profile" class="hover:text-white">Profile</a></li>
+                    <li><a href="/payments" class="hover:text-white">Payments</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold mb-4">Support</h3>
+                <ul class="text-blue-100 text-sm space-y-2">
+                    <li><a href="#" class="hover:text-white">Help</a></li>
+                    <li><a href="#" class="hover:text-white">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-blue-500 mt-8 pt-8 text-center text-blue-100 text-sm">
+            <p>&copy; 2026 Accra Housing - Tenant Mode. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
 @endsection

@@ -44,11 +44,14 @@ class AuthController extends Controller
 
             // In production, send OTP via SMS (e.g., using Twilio)
             // For now, we'll store it in session for demo
-            session(['pending_otp_user' => $user->id, 'demo_otp' => $otp]);
+            session([
+                'pending_otp_user' => $user->id,
+                'pending_phone' => $user->phone_number,
+                'demo_otp' => $otp,
+            ]);
 
-            return redirect('/verify-phone')->with([
-                'success' => "OTP sent to {$user->phone_number}. Code for demo: {$otp}",
-                'phone' => $user->phone_number,
+            return redirect()->route('verify-phone')->with([
+                'success' => "Account created successfully! OTP sent to {$user->phone_number}. Code for demo: {$otp}",
             ]);
         }
 
@@ -80,7 +83,7 @@ class AuthController extends Controller
                     ]);
 
                     Auth::login($user);
-                    return redirect($user->role === 'landlord' ? '/dashboard/landlord' : '/dashboard/tenant')
+                    return redirect()->intended($user->role === 'landlord' ? '/dashboard/landlord' : '/dashboard/tenant')
                         ->with('success', 'Email verified and logged in successfully!');
                 }
             }
@@ -125,7 +128,7 @@ class AuthController extends Controller
                 ]);
 
                 Auth::login($user);
-                return redirect($user->role === 'landlord' ? '/dashboard/landlord' : '/dashboard/tenant')
+                return redirect()->intended($user->role === 'landlord' ? '/dashboard/landlord' : '/dashboard/tenant')
                     ->with('success', 'Phone verified and logged in successfully!');
             }
 
@@ -258,13 +261,23 @@ class AuthController extends Controller
         $validated = $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
+            'role' => 'required|in:tenant,landlord',
             'remember' => 'nullable|boolean',
         ]);
 
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']], $validated['remember'] ?? false)) {
             $request->session()->regenerate();
 
-            $user = auth()->user();
+            /** @var \App\Models\User $user */
+                $user = auth()->user();
+
+            // Verify that the selected role matches the user's actual role
+            if ($user->role !== $validated['role']) {
+                Auth::logout();
+                return back()->withErrors([
+                    'role' => "Your account is registered as a {$user->role}, but you selected {$validated['role']}. Please select the correct role.",
+                ])->onlyInput('email');
+            }
 
             // Check if verified
             if ($user->verification_method === 'email' && !$user->email_verified_at) {
@@ -277,8 +290,12 @@ class AuthController extends Controller
                 return redirect('/verify-phone')->with('warning', 'Please verify your phone first.');
             }
 
-            $redirectPath = $user->role === 'landlord' ? '/dashboard/landlord' : '/dashboard/tenant';
-            return redirect($redirectPath)->with('success', 'Logged in successfully!');
+            // Redirect based on user role
+            if ($user->role === 'landlord') {
+                return redirect('/dashboard/landlord')->with('success', 'Logged in successfully!');
+            } elseif ($user->role === 'tenant') {
+                return redirect('/dashboard/tenant')->with('success', 'Logged in successfully!');
+            }
         }
 
         return back()->withErrors([

@@ -30,6 +30,9 @@ class User extends Authenticatable
         'role',
         'profile_info',
         'profile_picture',
+        'verification_method',
+        'email_verified_at',
+        'phone_verified_at',
     ];
 
     /**
@@ -52,6 +55,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'otp_expires_at' => 'datetime',
             'password' => 'hashed',
             'profile_info' => 'array',

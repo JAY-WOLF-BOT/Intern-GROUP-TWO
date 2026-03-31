@@ -231,7 +231,7 @@ You can register a new account or use existing demo accounts after registration.
 - `resources/views/auth/login.blade.php`
 
 ### Pages
-- `resources/views/welcome.blade.php` - Home page
+- `resources/views/Homepage.blade.php` - Home page
 - `resources/views/listings/index.blade.php` - Browse listings
 - `resources/views/listings/show.blade.php` - Listing details
 - `resources/views/listings/create.blade.php` - Create listing

@@ -24,11 +24,25 @@
 
             @if (session('success'))
                 <div class="mb-4 p-4 bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-400 rounded-lg">
-                    {{ session('success') }}
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        <span class="font-semibold">Success!</span>
+                    </div>
+                    <p class="mb-2">{{ session('success') }}</p>
+                    @if(strpos(session('success'), 'Code for demo:') !== false)
+                        <div class="mt-3 p-3 bg-green-200 dark:bg-green-800/50 rounded-lg border-2 border-dashed border-green-400">
+                            <p class="text-sm font-mono text-center text-green-800 dark:text-green-200">
+                                <strong>OTP Code:</strong>
+                                <span class="text-lg font-bold tracking-wider">
+                                    {{ substr(session('success'), strpos(session('success'), 'Code for demo:') + 15) }}
+                                </span>
+                            </p>
+                        </div>
+                    @endif
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('verify-phone') }}" class="space-y-4">
+            <form method="POST" action="{{ route('verify-phone.post') }}" class="space-y-4">
                 @csrf
 
                 <!-- Phone Display -->
@@ -57,25 +71,24 @@
                     Verify OTP
                 </button>
 
-                <!-- Resend OTP -->
-                <form method="POST" class="mt-4">
-                    @csrf
-                    <button type="submit" formaction="{{ route('resend-otp') }}" class="w-full text-red-600 hover:text-red-700 font-medium py-2 border border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition">
-                        <i class="fas fa-redo mr-2"></i> Resend OTP
-                    </button>
-                </form>
-
                 <!-- Back to Login -->
                 <p class="text-center text-gray-600 dark:text-gray-400">
                     <a href="{{ route('login') }}" class="text-red-600 hover:text-red-700 font-medium">Back to Login</a>
                 </p>
             </form>
 
+            <div class="mt-4 text-center">
+                <form method="POST" action="{{ route('resend-otp') }}">
+                    @csrf
+                    <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Resend OTP</button>
+                </form>
+            </div>
+
             <!-- Help Text -->
             <div class="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                 <p class="text-sm text-yellow-900 dark:text-yellow-300">
                     <i class="fas fa-lightbulb mr-2"></i>
-                    <strong>Demo Mode:</strong> The OTP code is displayed in the success message above.
+                    <strong>Demo Mode:</strong> The OTP code is prominently displayed in the highlighted box above for easy copying.
                 </p>
             </div>
         </div>

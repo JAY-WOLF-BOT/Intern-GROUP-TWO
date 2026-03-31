@@ -34,6 +34,32 @@
                     @enderror
                 </div>
 
+                <!-- Role Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">I am a...</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative">
+                            <input type="radio" name="role" value="tenant" {{ old('role', 'tenant') === 'tenant' ? 'checked' : '' }} class="sr-only" required>
+                            <div class="p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 transition" id="tenant-option">
+                                <i class="fas fa-home text-red-600 text-xl mb-2"></i>
+                                <p class="font-medium text-gray-900 dark:text-white">Tenant</p>
+                                <p class="text-xs text-gray-500">Looking for housing</p>
+                            </div>
+                        </label>
+                        <label class="relative">
+                            <input type="radio" name="role" value="landlord" {{ old('role') === 'landlord' ? 'checked' : '' }} class="sr-only" required>
+                            <div class="p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 transition" id="landlord-option">
+                                <i class="fas fa-building text-red-600 text-xl mb-2"></i>
+                                <p class="font-medium text-gray-900 dark:text-white">Landlord</p>
+                                <p class="text-xs text-gray-500">Listing properties</p>
+                            </div>
+                        </label>
+                    </div>
+                    @error('role')
+                        <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+
                 <!-- Remember Me & Forgot Password -->
                 <div class="flex items-center justify-between">
                     <label class="flex items-center">
@@ -66,4 +92,23 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Highlight selected role
+    document.querySelectorAll('input[name="role"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('[id$="-option"]').forEach(el => {
+                el.classList.remove('border-red-500', 'bg-red-50', 'dark:bg-red-900/10');
+                el.classList.add('border-gray-300');
+            });
+            if (this.checked) {
+                this.parentElement.querySelector('[id$="-option"]').classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-900/10');
+                this.parentElement.querySelector('[id$="-option"]').classList.remove('border-gray-300');
+            }
+        });
+        if (radio.checked) {
+            radio.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
 @endsection
