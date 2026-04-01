@@ -28,6 +28,7 @@ class Listing extends Model
         'bathrooms',
         'area_sqft',
         'property_type',
+        'category',
         'location_lat',
         'location_long',
         'location_address',

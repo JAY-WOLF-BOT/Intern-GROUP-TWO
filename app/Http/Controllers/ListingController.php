@@ -41,6 +41,7 @@ class ListingController extends Controller
             'bathrooms' => 'required|integer|min:1',
             'area_sqft' => 'nullable|integer|min:0',
             'property_type' => 'required|in:apartment,house,studio,shared_room,bungalow',
+            'category' => 'required|in:student_housing,luxury,commercial,family,budget,short_term',
             'neighborhood' => 'required|string|max:255',
             'furnished' => 'nullable|boolean',
             'wifi' => 'nullable|boolean',
@@ -48,15 +49,17 @@ class ListingController extends Controller
             'security' => 'nullable|boolean',
             'pool' => 'nullable|boolean',
             'gym' => 'nullable|boolean',
-            'photos' => 'nullable|array|max:3',
-            'photos.*' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:5120',
+            'photos' => 'required|array|min:3|max:3',
+            'photos.*' => 'required|file|mimes:jpeg,png,jpg,gif|max:5120',
+            'location_lat' => 'nullable|numeric',
+            'location_long' => 'nullable|numeric',
         ]);
 
         try {
-            // Generate default location
+            // Use provided location or generate default
+            $locationLat = $request->location_lat ?? (5.6037 + (rand(-100, 100) / 10000));
+            $locationLong = $request->location_long ?? (-0.1870 + (rand(-100, 100) / 10000));
             $locationAddress = $request->neighborhood . ', Accra, Ghana';
-            $locationLat = 5.6037 + (rand(-100, 100) / 10000);
-            $locationLong = -0.1870 + (rand(-100, 100) / 10000);
 
             // Create listing
             $listing = Listing::create([
@@ -69,6 +72,7 @@ class ListingController extends Controller
                 'bathrooms' => $validated['bathrooms'],
                 'area_sqft' => $validated['area_sqft'] ?? 0,
                 'property_type' => $validated['property_type'],
+                'category' => $validated['category'],
                 'neighborhood' => $validated['neighborhood'],
                 'location_address' => $locationAddress,
                 'location_lat' => $locationLat,

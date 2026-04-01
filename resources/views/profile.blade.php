@@ -40,7 +40,7 @@
                     <!-- Profile Picture -->
                     <div class="md:col-span-1">
                         <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Profile Picture</h2>
-                        <form action="{{ route('profile.avatar') }}" method="POST" enctype="multipart/form-data">
+                        <form id="avatarForm" action="{{ route('profile.avatar') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center bg-gray-50 dark:bg-gray-700/50 hover:border-red-500 transition cursor-pointer" onclick="document.getElementById('profilePictureInput').click()">
                                 <div id="profilePicturePreview" class="mb-4">
@@ -53,21 +53,21 @@
                                 </div>
                             </div>
                             <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*" style="display: none;" onchange="previewImage(this)">
-                            <div class="flex gap-2 mt-4">
-                                <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition">
-                                    <i class="fas fa-upload mr-2"></i> Save Picture
-                                </button>
-                                @if(auth()->user()->profile_picture)
-                                    <form method="POST" action="{{ route('profile.picture.delete') }}" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 rounded-lg transition">
-                                            <i class="fas fa-trash mr-2"></i> Remove
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
+                            <button type="submit" class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition">
+                                <i class="fas fa-upload mr-2"></i> Save Picture
+                            </button>
                         </form>
+
+                        <!-- Remove Button - Separate Form -->
+                        @if(auth()->user()->profile_picture)
+                            <form id="removeAvatarForm" action="{{ route('profile.picture.delete') }}" method="POST" class="mt-2">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 rounded-lg transition">
+                                    <i class="fas fa-trash mr-2"></i> Remove Picture
+                                </button>
+                            </form>
+                        @endif
                     </div>
 
                     <!-- Personal Information -->
@@ -166,4 +166,3 @@ document.getElementById('passwordModal').addEventListener('click', function(e) {
 });
 </script>
 @endsection
-

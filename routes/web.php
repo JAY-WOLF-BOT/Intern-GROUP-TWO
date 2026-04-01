@@ -69,13 +69,12 @@ Route::middleware('auth')->group(function () {
         return view('listings.index');
     })->name('listings.index');
 
-    Route::get('/listings/{id}', function ($id) {
-        return view('listings.show');
-    })->name('listings.show');
-
     // Listings management
     Route::get('/listings/create', [ListingController::class, 'create'])->name('listings.create');
     Route::post('/listings', [ListingController::class, 'store'])->name('listings.store');
+    Route::get('/listings/{id}', function ($id) {
+        return view('listings.show');
+    })->name('listings.show');
     Route::get('/listings/{id}/edit', [ListingController::class, 'edit'])->name('listings.edit');
     Route::put('/listings/{id}', [ListingController::class, 'update'])->name('listings.update');
     Route::delete('/listings/{id}', [ListingController::class, 'destroy'])->name('listings.destroy');
